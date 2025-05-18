@@ -2,11 +2,11 @@
 
 import { useState } from "react"
 import { MoreHorizontal, Trash } from "lucide-react"
+import Link from "next/link"
 
 import { Button } from "@/components/ui/button"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { useToast } from "@/components/ui/use-toast"
 import type { Employee } from "@/lib/types"
 
 interface EmployeeListProps {
@@ -14,23 +14,9 @@ interface EmployeeListProps {
 }
 
 export function EmployeeList({ employees }: EmployeeListProps) {
-  const { toast } = useToast()
   const [localEmployees, setLocalEmployees] = useState<Employee[]>(employees)
 
   const handleDelete = (id: string) => {
-    // Check if employee has payrolls
-    const payrolls = JSON.parse(localStorage.getItem("payrolls") || "[]")
-    const hasPayrolls = payrolls.some((payroll: any) => payroll.employeeId === id)
-
-    if (hasPayrolls) {
-      toast({
-        title: "Cannot delete employee",
-        description: "This employee has payrolls associated with them. Delete the payrolls first.",
-        variant: "destructive",
-      })
-      return
-    }
-
     // Filter out the employee to delete
     const updatedEmployees = localEmployees.filter((emp) => emp.id !== id)
 
@@ -39,22 +25,15 @@ export function EmployeeList({ employees }: EmployeeListProps) {
 
     // Update localStorage
     localStorage.setItem("employees", JSON.stringify(updatedEmployees))
-
-    // Also remove the user account if it exists
-    const users = JSON.parse(localStorage.getItem("users") || "[]")
-    const updatedUsers = users.filter((user: any) => user.id !== id)
-    localStorage.setItem("users", JSON.stringify(updatedUsers))
-
-    toast({
-      title: "Employee deleted",
-      description: "The employee has been deleted successfully.",
-    })
   }
 
   if (localEmployees.length === 0) {
     return (
       <div className="text-center py-6">
         <p className="text-muted-foreground">No employees found. Add an employee to get started.</p>
+        <Link href="/dashboard/employees/add" className="mt-4 inline-block">
+          <Button>Add Employee</Button>
+        </Link>
       </div>
     )
   }
@@ -78,7 +57,7 @@ export function EmployeeList({ employees }: EmployeeListProps) {
             <TableCell>{employee.position}</TableCell>
             <TableCell>{employee.department}</TableCell>
             <TableCell>{employee.email}</TableCell>
-            <TableCell className="text-right">₱{employee.salary.toFixed(2)}</TableCell>
+            <TableCell className="text-right">${employee.salary.toFixed(2)}</TableCell>
             <TableCell>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>

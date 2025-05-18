@@ -1,25 +1,17 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { Download, LogOut, Mail } from "lucide-react"
+import { Download, Mail } from "lucide-react"
 import Link from "next/link"
-import { useRouter } from "next/navigation"
 import Image from "next/image"
-
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
-import { ProtectedRoute } from "@/components/protected-route"
-import { useAuth } from "@/lib/auth-context"
 import type { Employee, Payroll } from "@/lib/types"
 
 export default function PayslipPage({ params }: { params: { id: string } }) {
-  const { user, logout } = useAuth()
-  const router = useRouter()
   const [payroll, setPayroll] = useState<Payroll | null>(null)
   const [employee, setEmployee] = useState<Employee | null>(null)
-  const [loading, setLoading] = useState(true)
-  const [authorized, setAuthorized] = useState(false)
 
   useEffect(() => {
     // Load payroll and employee data from localStorage
@@ -42,29 +34,12 @@ export default function PayslipPage({ params }: { params: { id: string } }) {
             setEmployee(foundEmployee)
           }
         }
-
-        // Check if user is authorized to view this payslip
-        if (user) {
-          if (user.role === "admin" || user.id === foundPayroll.employeeId) {
-            setAuthorized(true)
-          }
-        }
       }
     }
-
-    setLoading(false)
-  }, [params.id, user])
+  }, [params.id])
 
   const handlePrint = () => {
     window.print()
-  }
-
-  if (loading) {
-    return (
-      <div className="flex min-h-screen flex-col items-center justify-center">
-        <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent"></div>
-      </div>
-    )
   }
 
   if (!payroll || !employee) {
@@ -72,141 +47,123 @@ export default function PayslipPage({ params }: { params: { id: string } }) {
       <div className="flex min-h-screen flex-col items-center justify-center">
         <h1 className="text-2xl font-bold">Payslip not found</h1>
         <p className="text-muted-foreground">The requested payslip could not be found.</p>
-        <Link href="/dashboard" className="mt-4">
-          <Button>Go to Dashboard</Button>
-        </Link>
-      </div>
-    )
-  }
-
-  if (!authorized) {
-    return (
-      <div className="flex min-h-screen flex-col items-center justify-center">
-        <h1 className="text-2xl font-bold">Access Denied</h1>
-        <p className="text-muted-foreground">You are not authorized to view this payslip.</p>
-        <Link href="/dashboard" className="mt-4">
-          <Button>Go to Dashboard</Button>
+        <Link href="/" className="mt-4">
+          <Button>Go to Home</Button>
         </Link>
       </div>
     )
   }
 
   return (
-    <ProtectedRoute>
-      <div className="flex min-h-screen flex-col">
-        <header className="border-b print:hidden">
-          <div className="container flex h-16 items-center justify-between px-4 sm:px-6 lg:px-8">
-            <div className="flex items-center gap-2">
-              <Link href="/dashboard" className="flex items-center gap-2">
-                <Image src="/Logo.png" alt="SlipQR Logo" width={40} height={40} />
-                <span className="text-xl font-bold">SlipQR</span>
-              </Link>
-            </div>
-            <div className="flex items-center gap-4">
-              <Button onClick={handlePrint} variant="outline">
-                <Download className="mr-2 h-4 w-4" />
-                Print Payslip
-              </Button>
-              <Button variant="ghost" onClick={logout}>
-                <LogOut className="mr-2 h-4 w-4" />
-                Logout
-              </Button>
-            </div>
+    <div className="flex min-h-screen flex-col">
+      <header className="border-b print:hidden">
+        <div className="container flex h-16 items-center justify-between px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center gap-2">
+            <Link href="/" className="flex items-center gap-2">
+              <Image src="/Logo.png" alt="SlipQR Logo" width={40} height={40} />
+              <span className="text-xl font-bold">SlipQR</span>
+            </Link>
           </div>
-        </header>
-        <main className="flex-1 container py-6">
-          <Card className="max-w-3xl mx-auto">
-            <CardHeader className="flex flex-row items-center justify-between">
-              <div className="flex items-center gap-2">
-                <Image src="/Logo.png" alt="SlipQR Logo" width={40} height={40} />
-                <CardTitle className="text-xl">SlipQR</CardTitle>
+          <Button onClick={handlePrint} variant="outline">
+            <Download className="mr-2 h-4 w-4" />
+            Print Payslip
+          </Button>
+        </div>
+      </header>
+      <main className="flex-1 container py-6">
+        <Card className="max-w-3xl mx-auto">
+          <CardHeader className="flex flex-row items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Image src="/Logo.png" alt="SlipQR Logo" width={40} height={40} />
+              <CardTitle className="text-xl">PayrollQR</CardTitle>
+            </div>
+            <div className="text-right">
+              <h2 className="text-2xl font-bold">PAYSLIP</h2>
+              <p className="text-muted-foreground">Pay Period: {payroll.payPeriod}</p>
+            </div>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <h3 className="font-semibold text-lg">Employee Details</h3>
+                <p className="text-lg font-bold">{employee.name}</p>
+                <p>{employee.position}</p>
+                <p>{employee.department}</p>
+                <div className="flex items-center gap-1 mt-1">
+                  <Mail className="h-4 w-4" />
+                  <span>{employee.email}</span>
+                </div>
               </div>
               <div className="text-right">
-                <h2 className="text-2xl font-bold">PAYSLIP</h2>
-                <p className="text-muted-foreground">Pay Period: {payroll.payPeriod}</p>
+                <h3 className="font-semibold text-lg">Payment Information</h3>
+                <p>Pay Date: {new Date(payroll.payDate).toLocaleDateString()}</p>
+                <p>Payment Method: Direct Deposit</p>
+                <p>Employee ID: {employee.id}</p>
               </div>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <h3 className="font-semibold text-lg">Employee Details</h3>
-                  <p className="text-lg font-bold">{employee.name}</p>
-                  <p>{employee.position}</p>
-                  <p>{employee.department}</p>
-                  <div className="flex items-center gap-1 mt-1">
-                    <Mail className="h-4 w-4" />
-                    <span>{employee.email}</span>
-                  </div>
-                </div>
-                <div className="text-right">
-                  <h3 className="font-semibold text-lg">Payment Information</h3>
-                  <p>Pay Date: {new Date(payroll.payDate).toLocaleDateString()}</p>
-                  <p>Payment Method: Direct Deposit</p>
-                  <p>Employee ID: {employee.id}</p>
-                </div>
-              </div>
+            </div>
 
-              <Separator />
+            <Separator />
 
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <h3 className="font-semibold text-lg">Earnings</h3>
-                  <div className="space-y-1 mt-2">
-                    <div className="flex justify-between">
-                      <span>Basic Salary</span>
-                      <span>₱{(payroll.basicSalary ?? 0).toFixed(2)}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span>Overtime</span>
-                      <span>₱{(payroll.overtime ?? 0).toFixed(2)}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span>Bonus</span>
-                      <span>₱{(payroll.bonus ?? 0).toFixed(2)}</span>
-                    </div>
-                    <Separator className="my-2" />
-                    <div className="flex justify-between font-bold">
-                      <span>Gross Earnings</span>
-                      <span>₱{(payroll.grossSalary ?? 0).toFixed(2)}</span>
-                    </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <h3 className="font-semibold text-lg">Earnings</h3>
+                <div className="space-y-1 mt-2">
+                  <div className="flex justify-between">
+                    <span>Basic Salary</span>
+                    <span>₱{payroll.basicSalary.toFixed(2)}</span>
                   </div>
-                </div>
-                <div>
-                  <h3 className="font-semibold text-lg">Deductions</h3>
-                  <div className="space-y-1 mt-2">
-                    <div className="flex justify-between">
-                      <span>Tax</span>
-                      <span>₱{(payroll.tax ?? 0).toFixed(2)}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span>Insurance</span>
-                      <span>₱{(payroll.insurance ?? 0).toFixed(2)}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span>Other Deductions</span>
-                      <span>₱{(payroll.otherDeductions ?? 0).toFixed(2)}</span>
-                    </div>
-                    <Separator className="my-2" />
-                    <div className="flex justify-between font-bold">
-                      <span>Total Deductions</span>
-                      <span>₱{(payroll.totalDeductions ?? 0).toFixed(2)}</span>
-                    </div>
+                  <div className="flex justify-between">
+                    <span>Overtime</span>
+                    <span>₱{payroll.overtime.toFixed(2)}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Bonus</span>
+                    <span>₱{payroll.bonus.toFixed(2)}</span>
+                  </div>
+                  <Separator className="my-2" />
+                  <div className="flex justify-between font-bold">
+                    <span>Gross Earnings</span>
+                    <span>₱{payroll.grossSalary.toFixed(2)}</span>
                   </div>
                 </div>
               </div>
-
-              <Separator />
-
-              <div className="bg-muted p-4 rounded-lg">
-                <div className="flex justify-between text-lg font-bold">
-                  <span>Net Pay</span>
-                  <span>₱{(payroll.netSalary ?? 0).toFixed(2)}</span>
+              <div>
+                <h3 className="font-semibold text-lg">Deductions</h3>
+                <div className="space-y-1 mt-2">
+                  <div className="flex justify-between">
+                    <span>Tax</span>
+                    <span>₱{payroll.tax.toFixed(2)}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Insurance</span>
+                    <span>₱{payroll.insurance.toFixed(2)}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Other Deductions</span>
+                    <span>₱{payroll.otherDeductions.toFixed(2)}</span>
+                  </div>
+                  <Separator className="my-2" />
+                  <div className="flex justify-between font-bold">
+                    <span>Total Deductions</span>
+                    <span>₱{payroll.totalDeductions.toFixed(2)}</span>
+                  </div>
                 </div>
               </div>
-            </CardContent>
-          </Card>
-        </main>
-      </div>
-    </ProtectedRoute>
+            </div>
+
+            <Separator />
+
+            <div className="bg-muted p-4 rounded-lg">
+              <div className="flex justify-between text-lg font-bold">
+                <span>Net Pay</span>
+                <span>₱{payroll.netSalary.toFixed(2)}</span>
+              </div>
+            </div>
+
+            
+          </CardContent>
+        </Card>
+      </main>
+    </div>
   )
 }

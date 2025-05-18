@@ -12,7 +12,7 @@ export function QRCodeGenerator({ value, size = 200 }: QRCodeGeneratorProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
 
   useEffect(() => {
-    if (canvasRef.current && value) {
+    if (canvasRef.current) {
       QRCode.toCanvas(
         canvasRef.current,
         value,
@@ -23,7 +23,6 @@ export function QRCodeGenerator({ value, size = 200 }: QRCodeGeneratorProps) {
             dark: "#000000",
             light: "#ffffff",
           },
-          errorCorrectionLevel: "H",
         },
         (error) => {
           if (error) console.error("Error generating QR code:", error)
@@ -34,7 +33,7 @@ export function QRCodeGenerator({ value, size = 200 }: QRCodeGeneratorProps) {
 
   return (
     <div className="flex flex-col items-center">
-      <canvas ref={canvasRef} className="border rounded-lg shadow-sm" />
+      <canvas ref={canvasRef} />
     </div>
   )
 }
