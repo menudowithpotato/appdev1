@@ -15,15 +15,13 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useToast } from "@/components/ui/use-toast"
 import { ProtectedRoute } from "@/components/protected-route"
 import { useAuth } from "@/lib/auth-context"
-import { supabase } from "@/lib/supabase"
-import type { Employee } from "@/lib/types"
+import type { Employee, Payroll } from "@/lib/types"
 
 export default function GeneratePayrollPage() {
   const { user, logout } = useAuth()
   const router = useRouter()
   const { toast } = useToast()
   const [employees, setEmployees] = useState<Employee[]>([])
-  const [isLoading, setIsLoading] = useState(false)
   const [formData, setFormData] = useState({
     employeeId: "",
     payPeriod: "",
@@ -37,25 +35,12 @@ export default function GeneratePayrollPage() {
   })
 
   useEffect(() => {
-    // Load employees from Supabase
-    const fetchEmployees = async () => {
-      const { data, error } = await supabase.from("employees").select("*").order("name")
-
-      if (error) {
-        console.error("Error fetching employees:", error)
-        toast({
-          title: "Error",
-          description: "Failed to load employees.",
-          variant: "destructive",
-        })
-        return
-      }
-
-      setEmployees(data as Employee[])
+    // Load employees from localStorage
+    const storedEmployees = localStorage.getItem("employees")
+    if (storedEmployees) {
+      setEmployees(JSON.parse(storedEmployees))
     }
-
-    fetchEmployees()
-  }, [toast])
+  }, [])
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target
@@ -96,66 +81,58 @@ export default function GeneratePayrollPage() {
     }
   }
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    setIsLoading(true)
 
-    try {
-      // Get selected employee
-      const selectedEmployee = employees.find((emp) => emp.id === formData.employeeId)
+    // Get selected employee
+    const selectedEmployee = employees.find((emp) => emp.id === formData.employeeId)
 
-      if (!selectedEmployee) {
-        toast({
-          title: "Error",
-          description: "Please select an employee",
-          variant: "destructive",
-        })
-        return
-      }
-
-      const { grossSalary, totalDeductions, netSalary } = calculateNetSalary()
-
-      // Create new payroll
-      const { data, error } = await supabase
-        .from("payrolls")
-        .insert({
-          employee_id: formData.employeeId,
-          employee_name: selectedEmployee.name,
-          pay_period: formData.payPeriod,
-          pay_date: formData.payDate,
-          basic_salary: Number.parseFloat(formData.basicSalary),
-          overtime: Number.parseFloat(formData.overtime),
-          bonus: Number.parseFloat(formData.bonus),
-          gross_salary: grossSalary,
-          tax: Number.parseFloat(formData.tax),
-          insurance: Number.parseFloat(formData.insurance),
-          other_deductions: Number.parseFloat(formData.otherDeductions),
-          total_deductions: totalDeductions,
-          net_salary: netSalary,
-        })
-        .select()
-
-      if (error) {
-        throw new Error(error.message)
-      }
-
-      toast({
-        title: "Success",
-        description: "Payroll generated successfully.",
-      })
-
-      // Redirect to dashboard
-      router.push("/dashboard")
-    } catch (error) {
-      console.error("Error generating payroll:", error)
+    if (!selectedEmployee) {
       toast({
         title: "Error",
-        description: "An error occurred while generating the payroll.",
+        description: "Please select an employee",
         variant: "destructive",
       })
-    } finally {
-      setIsLoading(false)
+      return
     }
+
+    const { grossSalary, totalDeductions, netSalary } = calculateNetSalary()
+
+    // Create new payroll with unique ID
+    const newPayroll: Payroll = {
+      id: Date.now().toString(),
+      employeeId: formData.employeeId,
+      employeeName: selectedEmployee.name,
+      payPeriod: formData.payPeriod,
+      payDate: formData.payDate,
+      basicSalary: Number.parseFloat(formData.basicSalary),
+      overtime: Number.parseFloat(formData.overtime),
+      bonus: Number.parseFloat(formData.bonus),
+      grossSalary,
+      tax: Number.parseFloat(formData.tax),
+      insurance: Number.parseFloat(formData.insurance),
+      otherDeductions: Number.parseFloat(formData.otherDeductions),
+      totalDeductions,
+      netSalary,
+      createdAt: new Date().toISOString(),
+    }
+
+    // Get existing payrolls from localStorage
+    const existingPayrolls = JSON.parse(localStorage.getItem("payrolls") || "[]")
+
+    // Add new payroll to the list
+    const updatedPayrolls = [...existingPayrolls, newPayroll]
+
+    // Save to localStorage
+    localStorage.setItem("payrolls", JSON.stringify(updatedPayrolls))
+
+    toast({
+      title: "Success",
+      description: "Payroll generated successfully.",
+    })
+
+    // Redirect to dashboard
+    router.push("/dashboard")
   }
 
   return (
@@ -312,16 +289,7 @@ export default function GeneratePayrollPage() {
                   <Link href="/dashboard">
                     <Button variant="outline">Cancel</Button>
                   </Link>
-                  <Button type="submit" disabled={isLoading}>
-                    {isLoading ? (
-                      <span className="flex items-center gap-2">
-                        <span className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
-                        Generating...
-                      </span>
-                    ) : (
-                      "Generate Payroll"
-                    )}
-                  </Button>
+                  <Button type="submit">Generate Payroll</Button>
                 </CardFooter>
               </form>
             </Card>

@@ -10,7 +10,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
 import { ProtectedRoute } from "@/components/protected-route"
 import { useAuth } from "@/lib/auth-context"
-import { supabase } from "@/lib/supabase"
 import type { Employee, Payroll } from "@/lib/types"
 
 export default function PayslipPage({ params }: { params: { id: string } }) {
@@ -22,56 +21,37 @@ export default function PayslipPage({ params }: { params: { id: string } }) {
   const [authorized, setAuthorized] = useState(false)
 
   useEffect(() => {
-    const fetchData = async () => {
-      if (!user) return
+    // Load payroll and employee data from localStorage
+    const storedPayrolls = localStorage.getItem("payrolls")
+    const storedEmployees = localStorage.getItem("employees")
 
-      try {
-        // Fetch payroll data
-        const { data: payrollData, error: payrollError } = await supabase
-          .from("payrolls")
-          .select("*")
-          .eq("id", params.id)
-          .single()
+    if (storedPayrolls) {
+      const payrolls: Payroll[] = JSON.parse(storedPayrolls)
+      const foundPayroll = payrolls.find((p) => p.id === params.id)
 
-        if (payrollError) {
-          console.error("Error fetching payroll:", payrollError)
-          setLoading(false)
-          return
+      if (foundPayroll) {
+        setPayroll(foundPayroll)
+
+        // Find the employee associated with this payroll
+        if (storedEmployees) {
+          const employees: Employee[] = JSON.parse(storedEmployees)
+          const foundEmployee = employees.find((e) => e.id === foundPayroll.employeeId)
+
+          if (foundEmployee) {
+            setEmployee(foundEmployee)
+          }
         }
 
-        if (!payrollData) {
-          setLoading(false)
-          return
+        // Check if user is authorized to view this payslip
+        if (user) {
+          if (user.role === "admin" || user.id === foundPayroll.employeeId) {
+            setAuthorized(true)
+          }
         }
-
-        setPayroll(payrollData as Payroll)
-
-        // Fetch employee data
-        const { data: employeeData, error: employeeError } = await supabase
-          .from("employees")
-          .select("*")
-          .eq("id", payrollData.employee_id)
-          .single()
-
-        if (employeeError) {
-          console.error("Error fetching employee:", employeeError)
-        } else {
-          setEmployee(employeeData as Employee)
-        }
-
-        // Check authorization
-        if (user.role === "admin" || (employeeData && employeeData.user_id === user.id)) {
-          setAuthorized(true)
-        }
-
-        setLoading(false)
-      } catch (error) {
-        console.error("Error fetching data:", error)
-        setLoading(false)
       }
     }
 
-    fetchData()
+    setLoading(false)
   }, [params.id, user])
 
   const handlePrint = () => {
@@ -142,7 +122,7 @@ export default function PayslipPage({ params }: { params: { id: string } }) {
               </div>
               <div className="text-right">
                 <h2 className="text-2xl font-bold">PAYSLIP</h2>
-                <p className="text-muted-foreground">Pay Period: {payroll.pay_period}</p>
+                <p className="text-muted-foreground">Pay Period: {payroll.payPeriod}</p>
               </div>
             </CardHeader>
             <CardContent className="space-y-6">
@@ -159,7 +139,7 @@ export default function PayslipPage({ params }: { params: { id: string } }) {
                 </div>
                 <div className="text-right">
                   <h3 className="font-semibold text-lg">Payment Information</h3>
-                  <p>Pay Date: {new Date(payroll.pay_date).toLocaleDateString()}</p>
+                  <p>Pay Date: {new Date(payroll.payDate).toLocaleDateString()}</p>
                   <p>Payment Method: Direct Deposit</p>
                   <p>Employee ID: {employee.id}</p>
                 </div>
@@ -173,20 +153,20 @@ export default function PayslipPage({ params }: { params: { id: string } }) {
                   <div className="space-y-1 mt-2">
                     <div className="flex justify-between">
                       <span>Basic Salary</span>
-                      <span>${Number(payroll.basic_salary).toFixed(2)}</span>
+                      <span>${payroll.basicSalary.toFixed(2)}</span>
                     </div>
                     <div className="flex justify-between">
                       <span>Overtime</span>
-                      <span>${Number(payroll.overtime).toFixed(2)}</span>
+                      <span>${payroll.overtime.toFixed(2)}</span>
                     </div>
                     <div className="flex justify-between">
                       <span>Bonus</span>
-                      <span>${Number(payroll.bonus).toFixed(2)}</span>
+                      <span>${payroll.bonus.toFixed(2)}</span>
                     </div>
                     <Separator className="my-2" />
                     <div className="flex justify-between font-bold">
                       <span>Gross Earnings</span>
-                      <span>${Number(payroll.gross_salary).toFixed(2)}</span>
+                      <span>${payroll.grossSalary.toFixed(2)}</span>
                     </div>
                   </div>
                 </div>
@@ -195,20 +175,20 @@ export default function PayslipPage({ params }: { params: { id: string } }) {
                   <div className="space-y-1 mt-2">
                     <div className="flex justify-between">
                       <span>Tax</span>
-                      <span>${Number(payroll.tax).toFixed(2)}</span>
+                      <span>${payroll.tax.toFixed(2)}</span>
                     </div>
                     <div className="flex justify-between">
                       <span>Insurance</span>
-                      <span>${Number(payroll.insurance).toFixed(2)}</span>
+                      <span>${payroll.insurance.toFixed(2)}</span>
                     </div>
                     <div className="flex justify-between">
                       <span>Other Deductions</span>
-                      <span>${Number(payroll.other_deductions).toFixed(2)}</span>
+                      <span>${payroll.otherDeductions.toFixed(2)}</span>
                     </div>
                     <Separator className="my-2" />
                     <div className="flex justify-between font-bold">
                       <span>Total Deductions</span>
-                      <span>${Number(payroll.total_deductions).toFixed(2)}</span>
+                      <span>${payroll.totalDeductions.toFixed(2)}</span>
                     </div>
                   </div>
                 </div>
@@ -219,13 +199,13 @@ export default function PayslipPage({ params }: { params: { id: string } }) {
               <div className="bg-muted p-4 rounded-lg">
                 <div className="flex justify-between text-lg font-bold">
                   <span>Net Pay</span>
-                  <span>${Number(payroll.net_salary).toFixed(2)}</span>
+                  <span>${payroll.netSalary.toFixed(2)}</span>
                 </div>
               </div>
 
               <div className="text-center text-sm text-muted-foreground pt-4">
                 <p>This is a computer-generated document. No signature is required.</p>
-                <p>Generated on: {new Date(payroll.created_at || "").toLocaleString()}</p>
+                <p>Generated on: {new Date(payroll.createdAt).toLocaleString()}</p>
               </div>
             </CardContent>
           </Card>

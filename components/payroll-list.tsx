@@ -10,47 +10,32 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { useToast } from "@/components/ui/use-toast"
 import { QRCodeGenerator } from "@/components/qr-code-generator"
-import { supabase } from "@/lib/supabase"
 import type { Payroll } from "@/lib/types"
 
 interface PayrollListProps {
   payrolls: Payroll[]
-  onDataChange: () => void
 }
 
-export function PayrollList({ payrolls, onDataChange }: PayrollListProps) {
+export function PayrollList({ payrolls }: PayrollListProps) {
   const { toast } = useToast()
+  const [localPayrolls, setLocalPayrolls] = useState<Payroll[]>(payrolls)
   const [selectedPayroll, setSelectedPayroll] = useState<Payroll | null>(null)
   const [qrDialogOpen, setQrDialogOpen] = useState(false)
-  const [isDeleting, setIsDeleting] = useState<string | null>(null)
 
-  const handleDelete = async (id: string) => {
-    try {
-      setIsDeleting(id)
+  const handleDelete = (id: string) => {
+    // Filter out the payroll to delete
+    const updatedPayrolls = localPayrolls.filter((p) => p.id !== id)
 
-      const { error } = await supabase.from("payrolls").delete().eq("id", id)
+    // Update local state
+    setLocalPayrolls(updatedPayrolls)
 
-      if (error) {
-        throw new Error(error.message)
-      }
+    // Update localStorage
+    localStorage.setItem("payrolls", JSON.stringify(updatedPayrolls))
 
-      toast({
-        title: "Payroll deleted",
-        description: "The payroll has been deleted successfully.",
-      })
-
-      // Refresh the data
-      onDataChange()
-    } catch (error) {
-      console.error("Error deleting payroll:", error)
-      toast({
-        title: "Error",
-        description: "An error occurred while deleting the payroll.",
-        variant: "destructive",
-      })
-    } finally {
-      setIsDeleting(null)
-    }
+    toast({
+      title: "Payroll deleted",
+      description: "The payroll has been deleted successfully.",
+    })
   }
 
   const handleShowQR = (payroll: Payroll) => {
@@ -58,7 +43,7 @@ export function PayrollList({ payrolls, onDataChange }: PayrollListProps) {
     setQrDialogOpen(true)
   }
 
-  if (payrolls.length === 0) {
+  if (localPayrolls.length === 0) {
     return (
       <div className="text-center py-6">
         <p className="text-muted-foreground">No payrolls found. Generate a payroll to get started.</p>
@@ -80,13 +65,13 @@ export function PayrollList({ payrolls, onDataChange }: PayrollListProps) {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {payrolls.map((payroll) => (
+          {localPayrolls.map((payroll) => (
             <TableRow key={payroll.id}>
-              <TableCell className="font-medium">{payroll.employee_name}</TableCell>
-              <TableCell>{payroll.pay_period}</TableCell>
-              <TableCell>{new Date(payroll.pay_date).toLocaleDateString()}</TableCell>
-              <TableCell className="text-right">${Number(payroll.gross_salary).toFixed(2)}</TableCell>
-              <TableCell className="text-right">${Number(payroll.net_salary).toFixed(2)}</TableCell>
+              <TableCell className="font-medium">{payroll.employeeName}</TableCell>
+              <TableCell>{payroll.payPeriod}</TableCell>
+              <TableCell>{new Date(payroll.payDate).toLocaleDateString()}</TableCell>
+              <TableCell className="text-right">${payroll.grossSalary.toFixed(2)}</TableCell>
+              <TableCell className="text-right">${payroll.netSalary.toFixed(2)}</TableCell>
               <TableCell>
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
@@ -106,18 +91,9 @@ export function PayrollList({ payrolls, onDataChange }: PayrollListProps) {
                       <QrCode className="mr-2 h-4 w-4" />
                       Show QR Code
                     </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => handleDelete(payroll.id)} disabled={isDeleting === payroll.id}>
-                      {isDeleting === payroll.id ? (
-                        <span className="flex items-center">
-                          <span className="h-4 w-4 mr-2 animate-spin rounded-full border-2 border-current border-t-transparent" />
-                          Deleting...
-                        </span>
-                      ) : (
-                        <>
-                          <Trash className="mr-2 h-4 w-4" />
-                          Delete
-                        </>
-                      )}
+                    <DropdownMenuItem onClick={() => handleDelete(payroll.id)}>
+                      <Trash className="mr-2 h-4 w-4" />
+                      Delete
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
@@ -137,7 +113,7 @@ export function PayrollList({ payrolls, onDataChange }: PayrollListProps) {
               <>
                 <QRCodeGenerator value={`${window.location.origin}/payslip/${selectedPayroll.id}`} />
                 <p className="text-center mt-4 text-sm text-muted-foreground">
-                  Scan this QR code to view the payslip for {selectedPayroll.employee_name}
+                  Scan this QR code to view the payslip for {selectedPayroll.employeeName}
                 </p>
                 <div className="mt-4">
                   <Link href={`/payslip/${selectedPayroll.id}`} target="_blank">

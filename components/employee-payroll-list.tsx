@@ -47,10 +47,10 @@ export function EmployeePayrollList({ payrolls }: EmployeePayrollListProps) {
         <TableBody>
           {payrolls.map((payroll) => (
             <TableRow key={payroll.id}>
-              <TableCell className="font-medium">{payroll.pay_period}</TableCell>
-              <TableCell>{new Date(payroll.pay_date).toLocaleDateString()}</TableCell>
-              <TableCell className="text-right">${Number(payroll.gross_salary).toFixed(2)}</TableCell>
-              <TableCell className="text-right">${Number(payroll.net_salary).toFixed(2)}</TableCell>
+              <TableCell className="font-medium">{payroll.payPeriod}</TableCell>
+              <TableCell>{new Date(payroll.payDate).toLocaleDateString()}</TableCell>
+              <TableCell className="text-right">${payroll.grossSalary.toFixed(2)}</TableCell>
+              <TableCell className="text-right">${payroll.netSalary.toFixed(2)}</TableCell>
               <TableCell>
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
@@ -88,7 +88,7 @@ export function EmployeePayrollList({ payrolls }: EmployeePayrollListProps) {
               <>
                 <QRCodeGenerator value={`${window.location.origin}/payslip/${selectedPayroll.id}`} />
                 <p className="text-center mt-4 text-sm text-muted-foreground">
-                  Scan this QR code to view your payslip for {selectedPayroll.pay_period}
+                  Scan this QR code to view your payslip for {selectedPayroll.payPeriod}
                 </p>
                 <div className="mt-4">
                   <Link href={`/payslip/${selectedPayroll.id}`} target="_blank">

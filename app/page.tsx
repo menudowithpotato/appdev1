@@ -10,7 +10,7 @@ export default function HomePage() {
         <div className="container flex h-16 items-center justify-between px-4 sm:px-6 lg:px-8">
           <div className="flex items-center gap-2">
             <Briefcase className="h-6 w-6" />
-            <span className="text-xl font-bold">SlipQR</span>
+            <span className="text-xl font-bold">Sli</span>
           </div>
           <nav className="flex items-center gap-4">
             <Link href="/login">
@@ -41,7 +41,11 @@ export default function HomePage() {
           </div>
         </section>
       </main>
-
+      <footer className="border-t py-6">
+        <div className="container flex flex-col items-center justify-center gap-4 px-4 text-center md:px-6">
+          <p className="text-sm text-gray-500">© {new Date().getFullYear()} PayrollQR. All rights reserved.</p>
+        </div>
+      </footer>
     </div>
   )
 }

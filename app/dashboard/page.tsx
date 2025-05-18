@@ -12,89 +12,29 @@ import { EmployeeList } from "@/components/employee-list"
 import { PayrollList } from "@/components/payroll-list"
 import { EmployeePayrollList } from "@/components/employee-payroll-list"
 import { useAuth } from "@/lib/auth-context"
-import { supabase } from "@/lib/supabase"
 import type { Employee, Payroll } from "@/lib/types"
 
 export default function DashboardPage() {
   const { user, logout } = useAuth()
   const [employees, setEmployees] = useState<Employee[]>([])
   const [payrolls, setPayrolls] = useState<Payroll[]>([])
-  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    const fetchData = async () => {
-      if (!user) return
+    // Load data from localStorage on component mount
+    const storedEmployees = localStorage.getItem("employees")
+    const storedPayrolls = localStorage.getItem("payrolls")
 
-      setLoading(true)
-
-      try {
-        if (user.role === "admin") {
-          // Fetch all employees
-          const { data: employeesData, error: employeesError } = await supabase
-            .from("employees")
-            .select("*")
-            .order("name")
-
-          if (employeesError) {
-            console.error("Error fetching employees:", employeesError)
-          } else {
-            setEmployees(employeesData as Employee[])
-          }
-
-          // Fetch all payrolls
-          const { data: payrollsData, error: payrollsError } = await supabase
-            .from("payrolls")
-            .select("*")
-            .order("created_at", { ascending: false })
-
-          if (payrollsError) {
-            console.error("Error fetching payrolls:", payrollsError)
-          } else {
-            setPayrolls(payrollsData as Payroll[])
-          }
-        } else {
-          // For employees, fetch only their payrolls
-          // First get the employee record
-          const { data: employeeData, error: employeeError } = await supabase
-            .from("employees")
-            .select("*")
-            .eq("user_id", user.id)
-            .single()
-
-          if (employeeError) {
-            console.error("Error fetching employee data:", employeeError)
-          } else if (employeeData) {
-            // Then fetch payrolls for this employee
-            const { data: payrollsData, error: payrollsError } = await supabase
-              .from("payrolls")
-              .select("*")
-              .eq("employee_id", employeeData.id)
-              .order("created_at", { ascending: false })
-
-            if (payrollsError) {
-              console.error("Error fetching payrolls:", payrollsError)
-            } else {
-              setPayrolls(payrollsData as Payroll[])
-            }
-          }
-        }
-      } catch (error) {
-        console.error("Error fetching dashboard data:", error)
-      } finally {
-        setLoading(false)
-      }
+    if (storedEmployees) {
+      setEmployees(JSON.parse(storedEmployees))
     }
 
-    fetchData()
-  }, [user])
+    if (storedPayrolls) {
+      setPayrolls(JSON.parse(storedPayrolls))
+    }
+  }, [])
 
-  if (loading) {
-    return (
-      <div className="flex min-h-screen items-center justify-center">
-        <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent"></div>
-      </div>
-    )
-  }
+  // Filter payrolls for employee view
+  const employeePayrolls = user?.role === "employee" ? payrolls.filter((payroll) => payroll.employeeId === user.id) : []
 
   return (
     <ProtectedRoute>
@@ -175,19 +115,7 @@ export default function DashboardPage() {
                     <CardDescription>Manage your employees here.</CardDescription>
                   </CardHeader>
                   <CardContent>
-                    <EmployeeList
-                      employees={employees}
-                      onDataChange={() => {
-                        // Refresh employees data
-                        supabase
-                          .from("employees")
-                          .select("*")
-                          .order("name")
-                          .then(({ data }) => {
-                            if (data) setEmployees(data as Employee[])
-                          })
-                      }}
-                    />
+                    <EmployeeList employees={employees} />
                   </CardContent>
                 </Card>
               </TabsContent>
@@ -198,19 +126,7 @@ export default function DashboardPage() {
                     <CardDescription>View and manage payrolls.</CardDescription>
                   </CardHeader>
                   <CardContent>
-                    <PayrollList
-                      payrolls={payrolls}
-                      onDataChange={() => {
-                        // Refresh payrolls data
-                        supabase
-                          .from("payrolls")
-                          .select("*")
-                          .order("created_at", { ascending: false })
-                          .then(({ data }) => {
-                            if (data) setPayrolls(data as Payroll[])
-                          })
-                      }}
-                    />
+                    <PayrollList payrolls={payrolls} />
                   </CardContent>
                 </Card>
               </TabsContent>
@@ -222,7 +138,7 @@ export default function DashboardPage() {
                 <CardDescription>View your payslips here.</CardDescription>
               </CardHeader>
               <CardContent>
-                <EmployeePayrollList payrolls={payrolls} />
+                <EmployeePayrollList payrolls={employeePayrolls} />
               </CardContent>
             </Card>
           )}

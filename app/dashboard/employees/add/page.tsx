@@ -14,13 +14,12 @@ import { Label } from "@/components/ui/label"
 import { useToast } from "@/components/ui/use-toast"
 import { ProtectedRoute } from "@/components/protected-route"
 import { useAuth } from "@/lib/auth-context"
-import { supabase } from "@/lib/supabase"
+import type { Employee } from "@/lib/types"
 
 export default function AddEmployeePage() {
   const { user, logout } = useAuth()
   const router = useRouter()
   const { toast } = useToast()
-  const [isLoading, setIsLoading] = useState(false)
   const [formData, setFormData] = useState({
     name: "",
     position: "",
@@ -34,64 +33,45 @@ export default function AddEmployeePage() {
     setFormData((prev) => ({ ...prev, [name]: value }))
   }
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    setIsLoading(true)
 
-    try {
-      // Check if email already exists
-      const { count, error: countError } = await supabase
-        .from("employees")
-        .select("*", { count: "exact", head: true })
-        .eq("email", formData.email.toLowerCase())
+    // Get existing employees from localStorage
+    const existingEmployees = JSON.parse(localStorage.getItem("employees") || "[]")
 
-      if (countError) {
-        throw new Error("Error checking existing employees")
-      }
-
-      if (count && count > 0) {
-        toast({
-          title: "Error",
-          description: "An employee with this email already exists.",
-          variant: "destructive",
-        })
-        return
-      }
-
-      // Insert the employee
-      const { data, error } = await supabase
-        .from("employees")
-        .insert({
-          name: formData.name,
-          position: formData.position,
-          department: formData.department,
-          email: formData.email.toLowerCase(),
-          salary: Number.parseFloat(formData.salary),
-          user_id: null, // This employee doesn't have a user account yet
-        })
-        .select()
-
-      if (error) {
-        throw new Error(error.message)
-      }
-
-      toast({
-        title: "Success",
-        description: "Employee added successfully.",
-      })
-
-      // Redirect to dashboard
-      router.push("/dashboard")
-    } catch (error) {
-      console.error("Error adding employee:", error)
+    // Check if email already exists
+    if (existingEmployees.some((emp: Employee) => emp.email.toLowerCase() === formData.email.toLowerCase())) {
       toast({
         title: "Error",
-        description: "An error occurred while adding the employee.",
+        description: "An employee with this email already exists.",
         variant: "destructive",
       })
-    } finally {
-      setIsLoading(false)
+      return
     }
+
+    // Create new employee with unique ID
+    const newEmployee: Employee = {
+      id: Date.now().toString(),
+      name: formData.name,
+      position: formData.position,
+      department: formData.department,
+      email: formData.email,
+      salary: Number.parseFloat(formData.salary),
+    }
+
+    // Add new employee to the list
+    const updatedEmployees = [...existingEmployees, newEmployee]
+
+    // Save to localStorage
+    localStorage.setItem("employees", JSON.stringify(updatedEmployees))
+
+    toast({
+      title: "Success",
+      description: "Employee added successfully.",
+    })
+
+    // Redirect to dashboard
+    router.push("/dashboard")
   }
 
   return (
@@ -187,16 +167,7 @@ export default function AddEmployeePage() {
                   <Link href="/dashboard">
                     <Button variant="outline">Cancel</Button>
                   </Link>
-                  <Button type="submit" disabled={isLoading}>
-                    {isLoading ? (
-                      <span className="flex items-center gap-2">
-                        <span className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
-                        Adding...
-                      </span>
-                    ) : (
-                      "Add Employee"
-                    )}
-                  </Button>
+                  <Button type="submit">Add Employee</Button>
                 </CardFooter>
               </form>
             </Card>

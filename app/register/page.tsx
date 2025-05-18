@@ -13,10 +13,9 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { useToast } from "@/components/ui/use-toast"
-import { useAuth } from "@/lib/auth-context"
+import type { User, UserRole } from "@/lib/auth-context"
 
 export default function RegisterPage() {
-  const { register } = useAuth()
   const router = useRouter()
   const { toast } = useToast()
   const [isLoading, setIsLoading] = useState(false)
@@ -25,7 +24,7 @@ export default function RegisterPage() {
     email: "",
     password: "",
     confirmPassword: "",
-    role: "employee" as "admin" | "employee",
+    role: "employee" as UserRole,
   })
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -33,7 +32,7 @@ export default function RegisterPage() {
     setFormData((prev) => ({ ...prev, [name]: value }))
   }
 
-  const handleRoleChange = (value: "admin" | "employee") => {
+  const handleRoleChange = (value: UserRole) => {
     setFormData((prev) => ({ ...prev, role: value }))
   }
 
@@ -53,21 +52,58 @@ export default function RegisterPage() {
         return
       }
 
-      const result = await register(formData.email, formData.password, formData.name, formData.role)
+      // Get existing users
+      const existingUsers = JSON.parse(localStorage.getItem("users") || "[]") as User[]
 
-      if (result.success) {
-        toast({
-          title: "Registration successful",
-          description: "Your account has been created. Please log in.",
-        })
-        router.push("/login")
-      } else {
+      // Check if email already exists
+      if (existingUsers.some((user) => user.email.toLowerCase() === formData.email.toLowerCase())) {
         toast({
           title: "Registration failed",
-          description: result.message,
+          description: "Email already in use.",
           variant: "destructive",
         })
+        setIsLoading(false)
+        return
       }
+
+      // Create new user
+      const newUser: User = {
+        id: Date.now().toString(),
+        name: formData.name,
+        email: formData.email,
+        password: formData.password,
+        role: formData.role,
+      }
+
+      // Add user to localStorage
+      localStorage.setItem("users", JSON.stringify([...existingUsers, newUser]))
+
+      // If this is the first user, make them an admin
+      if (existingUsers.length === 0) {
+        newUser.role = "admin"
+      }
+
+      // If user is an employee, create an employee record
+      if (newUser.role === "employee") {
+        const existingEmployees = JSON.parse(localStorage.getItem("employees") || "[]")
+        const newEmployee = {
+          id: newUser.id,
+          name: newUser.name,
+          position: "Not set",
+          department: "Not set",
+          email: newUser.email,
+          salary: 0,
+        }
+        localStorage.setItem("employees", JSON.stringify([...existingEmployees, newEmployee]))
+      }
+
+      toast({
+        title: "Registration successful",
+        description: "Your account has been created.",
+      })
+
+      // Redirect to login page
+      router.push("/login")
     } catch (error) {
       toast({
         title: "Registration failed",
@@ -86,7 +122,7 @@ export default function RegisterPage() {
           <div className="flex items-center gap-2">
             <Link href="/" className="flex items-center gap-2">
               <Briefcase className="h-6 w-6" />
-              <span className="text-xl font-bold">SlipQR</span>
+              <span className="text-xl font-bold">PayrollQR</span>
             </Link>
           </div>
         </div>
@@ -150,7 +186,7 @@ export default function RegisterPage() {
                 <Label>Account Type</Label>
                 <RadioGroup
                   value={formData.role}
-                  onValueChange={(value) => handleRoleChange(value as "admin" | "employee")}
+                  onValueChange={(value) => handleRoleChange(value as UserRole)}
                   className="flex space-x-4"
                 >
                   <div className="flex items-center space-x-2">
