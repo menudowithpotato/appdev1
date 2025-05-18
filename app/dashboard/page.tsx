@@ -1,9 +1,9 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { Briefcase, LogOut, Plus, Users } from "lucide-react"
+import {  LogOut, Plus, Users } from "lucide-react"
 import Link from "next/link"
-
+import Image from "next/image"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
@@ -43,7 +43,7 @@ export default function DashboardPage() {
           <div className="container flex h-16 items-center justify-between px-4 sm:px-6 lg:px-8">
             <div className="flex items-center gap-2">
               <Link href="/" className="flex items-center gap-2">
-                <Briefcase className="h-6 w-6" />
+                <Image src="/Logo.png" alt="SlipQR Logo" width={40} height={40} />
                 <span className="text-xl font-bold">SlipQR</span>
               </Link>
             </div>
@@ -93,7 +93,7 @@ export default function DashboardPage() {
               <Card>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                   <CardTitle className="text-sm font-medium">Total Payrolls</CardTitle>
-                  <Briefcase className="h-4 w-4 text-muted-foreground" />
+                  <Image src="/Logo.png" alt="SlipQR Logo" width={40} height={40} />
                 </CardHeader>
                 <CardContent>
                   <div className="text-2xl font-bold">{payrolls.length}</div>

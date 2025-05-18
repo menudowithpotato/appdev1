@@ -3,7 +3,8 @@
 import type React from "react"
 
 import { useState } from "react"
-import { Briefcase, UserPlus } from "lucide-react"
+import { UserPlus } from "lucide-react"
+import Image from "next/image"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 
@@ -121,7 +122,7 @@ export default function RegisterPage() {
         <div className="container flex h-16 items-center px-4 sm:px-6 lg:px-8">
           <div className="flex items-center gap-2">
             <Link href="/" className="flex items-center gap-2">
-              <Briefcase className="h-6 w-6" />
+              <Image src="/Logo.png" alt="SlipQR Logo" width={40} height={40} />
               <span className="text-xl font-bold">SlipQR</span>
             </Link>
           </div>

@@ -1,9 +1,10 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { Briefcase, Download, LogOut, Mail } from "lucide-react"
+import { Download, LogOut, Mail } from "lucide-react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
+import Image from "next/image"
 
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -97,7 +98,7 @@ export default function PayslipPage({ params }: { params: { id: string } }) {
           <div className="container flex h-16 items-center justify-between px-4 sm:px-6 lg:px-8">
             <div className="flex items-center gap-2">
               <Link href="/dashboard" className="flex items-center gap-2">
-                <Briefcase className="h-6 w-6" />
+                <Image src="/Logo.png" alt="SlipQR Logo" width={40} height={40} />
                 <span className="text-xl font-bold">SlipQR</span>
               </Link>
             </div>
@@ -117,7 +118,7 @@ export default function PayslipPage({ params }: { params: { id: string } }) {
           <Card className="max-w-3xl mx-auto">
             <CardHeader className="flex flex-row items-center justify-between">
               <div className="flex items-center gap-2">
-                <Briefcase className="h-6 w-6" />
+                <Image src="/Logo.png" alt="SlipQR Logo" width={40} height={40} />
                 <CardTitle className="text-xl">SlipQR</CardTitle>
               </div>
               <div className="text-right">
