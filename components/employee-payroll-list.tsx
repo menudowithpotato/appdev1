@@ -49,8 +49,8 @@ export function EmployeePayrollList({ payrolls }: EmployeePayrollListProps) {
             <TableRow key={payroll.id}>
               <TableCell className="font-medium">{payroll.payPeriod}</TableCell>
               <TableCell>{new Date(payroll.payDate).toLocaleDateString()}</TableCell>
-              <TableCell className="text-right">${payroll.grossSalary.toFixed(2)}</TableCell>
-              <TableCell className="text-right">${payroll.netSalary.toFixed(2)}</TableCell>
+              <TableCell className="text-right">₱{payroll.grossSalary.toFixed(2)}</TableCell>
+              <TableCell className="text-right">₱{payroll.netSalary.toFixed(2)}</TableCell>
               <TableCell>
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
@@ -61,7 +61,7 @@ export function EmployeePayrollList({ payrolls }: EmployeePayrollListProps) {
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
                     <DropdownMenuItem asChild>
-                      <Link href={`/payslip/${payroll.id}`}>
+                      <Link href={`/payslip/₱{payroll.id}`}>
                         <Eye className="mr-2 h-4 w-4" />
                         View Payslip
                       </Link>
@@ -86,12 +86,12 @@ export function EmployeePayrollList({ payrolls }: EmployeePayrollListProps) {
           <div className="flex flex-col items-center justify-center p-4">
             {selectedPayroll && (
               <>
-                <QRCodeGenerator value={`${window.location.origin}/payslip/${selectedPayroll.id}`} />
+                <QRCodeGenerator value={`₱{window.location.origin}/payslip/₱{selectedPayroll.id}`} />
                 <p className="text-center mt-4 text-sm text-muted-foreground">
                   Scan this QR code to view your payslip for {selectedPayroll.payPeriod}
                 </p>
                 <div className="mt-4">
-                  <Link href={`/payslip/${selectedPayroll.id}`} target="_blank">
+                  <Link href={`/payslip/₱{selectedPayroll.id}`} target="_blank">
                     <Button variant="outline">Open Payslip</Button>
                   </Link>
                 </div>

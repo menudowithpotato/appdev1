@@ -78,7 +78,7 @@ export function EmployeeList({ employees }: EmployeeListProps) {
             <TableCell>{employee.position}</TableCell>
             <TableCell>{employee.department}</TableCell>
             <TableCell>{employee.email}</TableCell>
-            <TableCell className="text-right">${employee.salary.toFixed(2)}</TableCell>
+            <TableCell className="text-right">₱{employee.salary.toFixed(2)}</TableCell>
             <TableCell>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>

@@ -273,15 +273,15 @@ export default function GeneratePayrollPage() {
                   <div className="pt-2 border-t">
                     <div className="flex justify-between">
                       <span>Gross Salary:</span>
-                      <span className="font-semibold">${calculateNetSalary().grossSalary.toFixed(2)}</span>
+                      <span className="font-semibold">₱{calculateNetSalary().grossSalary.toFixed(2)}</span>
                     </div>
                     <div className="flex justify-between">
                       <span>Total Deductions:</span>
-                      <span className="font-semibold">${calculateNetSalary().totalDeductions.toFixed(2)}</span>
+                      <span className="font-semibold">₱{calculateNetSalary().totalDeductions.toFixed(2)}</span>
                     </div>
                     <div className="flex justify-between">
                       <span>Net Salary:</span>
-                      <span className="font-semibold">${calculateNetSalary().netSalary.toFixed(2)}</span>
+                      <span className="font-semibold">₱{calculateNetSalary().netSalary.toFixed(2)}</span>
                     </div>
                   </div>
                 </CardContent>

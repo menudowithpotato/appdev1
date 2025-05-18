@@ -153,20 +153,20 @@ export default function PayslipPage({ params }: { params: { id: string } }) {
                   <div className="space-y-1 mt-2">
                     <div className="flex justify-between">
                       <span>Basic Salary</span>
-                      <span>${(payroll.basicSalary ?? 0).toFixed(2)}</span>
+                      <span>₱{(payroll.basicSalary ?? 0).toFixed(2)}</span>
                     </div>
                     <div className="flex justify-between">
                       <span>Overtime</span>
-                      <span>${(payroll.overtime ?? 0).toFixed(2)}</span>
+                      <span>₱{(payroll.overtime ?? 0).toFixed(2)}</span>
                     </div>
                     <div className="flex justify-between">
                       <span>Bonus</span>
-                      <span>${(payroll.bonus ?? 0).toFixed(2)}</span>
+                      <span>₱{(payroll.bonus ?? 0).toFixed(2)}</span>
                     </div>
                     <Separator className="my-2" />
                     <div className="flex justify-between font-bold">
                       <span>Gross Earnings</span>
-                      <span>${(payroll.grossSalary ?? 0).toFixed(2)}</span>
+                      <span>₱{(payroll.grossSalary ?? 0).toFixed(2)}</span>
                     </div>
                   </div>
                 </div>
@@ -175,20 +175,20 @@ export default function PayslipPage({ params }: { params: { id: string } }) {
                   <div className="space-y-1 mt-2">
                     <div className="flex justify-between">
                       <span>Tax</span>
-                      <span>${(payroll.tax ?? 0).toFixed(2)}</span>
+                      <span>₱{(payroll.tax ?? 0).toFixed(2)}</span>
                     </div>
                     <div className="flex justify-between">
                       <span>Insurance</span>
-                      <span>${(payroll.insurance ?? 0).toFixed(2)}</span>
+                      <span>₱{(payroll.insurance ?? 0).toFixed(2)}</span>
                     </div>
                     <div className="flex justify-between">
                       <span>Other Deductions</span>
-                      <span>${(payroll.otherDeductions ?? 0).toFixed(2)}</span>
+                      <span>₱{(payroll.otherDeductions ?? 0).toFixed(2)}</span>
                     </div>
                     <Separator className="my-2" />
                     <div className="flex justify-between font-bold">
                       <span>Total Deductions</span>
-                      <span>${(payroll.totalDeductions ?? 0).toFixed(2)}</span>
+                      <span>₱{(payroll.totalDeductions ?? 0).toFixed(2)}</span>
                     </div>
                   </div>
                 </div>
@@ -199,7 +199,7 @@ export default function PayslipPage({ params }: { params: { id: string } }) {
               <div className="bg-muted p-4 rounded-lg">
                 <div className="flex justify-between text-lg font-bold">
                   <span>Net Pay</span>
-                  <span>${(payroll.netSalary ?? 0).toFixed(2)}</span>
+                  <span>₱{(payroll.netSalary ?? 0).toFixed(2)}</span>
                 </div>
               </div>
             </CardContent>
