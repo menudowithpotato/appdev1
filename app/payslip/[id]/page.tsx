@@ -98,7 +98,7 @@ export default function PayslipPage({ params }: { params: { id: string } }) {
             <div className="flex items-center gap-2">
               <Link href="/dashboard" className="flex items-center gap-2">
                 <Briefcase className="h-6 w-6" />
-                <span className="text-xl font-bold">PayrollQR</span>
+                <span className="text-xl font-bold">SlipQR</span>
               </Link>
             </div>
             <div className="flex items-center gap-4">
@@ -118,7 +118,7 @@ export default function PayslipPage({ params }: { params: { id: string } }) {
             <CardHeader className="flex flex-row items-center justify-between">
               <div className="flex items-center gap-2">
                 <Briefcase className="h-6 w-6" />
-                <CardTitle className="text-xl">PayrollQR</CardTitle>
+                <CardTitle className="text-xl">SlipQR</CardTitle>
               </div>
               <div className="text-right">
                 <h2 className="text-2xl font-bold">PAYSLIP</h2>
@@ -153,20 +153,20 @@ export default function PayslipPage({ params }: { params: { id: string } }) {
                   <div className="space-y-1 mt-2">
                     <div className="flex justify-between">
                       <span>Basic Salary</span>
-                      <span>${payroll.basicSalary.toFixed(2)}</span>
+                      <span>${(payroll.basicSalary ?? 0).toFixed(2)}</span>
                     </div>
                     <div className="flex justify-between">
                       <span>Overtime</span>
-                      <span>${payroll.overtime.toFixed(2)}</span>
+                      <span>${(payroll.overtime ?? 0).toFixed(2)}</span>
                     </div>
                     <div className="flex justify-between">
                       <span>Bonus</span>
-                      <span>${payroll.bonus.toFixed(2)}</span>
+                      <span>${(payroll.bonus ?? 0).toFixed(2)}</span>
                     </div>
                     <Separator className="my-2" />
                     <div className="flex justify-between font-bold">
                       <span>Gross Earnings</span>
-                      <span>${payroll.grossSalary.toFixed(2)}</span>
+                      <span>${(payroll.grossSalary ?? 0).toFixed(2)}</span>
                     </div>
                   </div>
                 </div>
@@ -175,20 +175,20 @@ export default function PayslipPage({ params }: { params: { id: string } }) {
                   <div className="space-y-1 mt-2">
                     <div className="flex justify-between">
                       <span>Tax</span>
-                      <span>${payroll.tax.toFixed(2)}</span>
+                      <span>${(payroll.tax ?? 0).toFixed(2)}</span>
                     </div>
                     <div className="flex justify-between">
                       <span>Insurance</span>
-                      <span>${payroll.insurance.toFixed(2)}</span>
+                      <span>${(payroll.insurance ?? 0).toFixed(2)}</span>
                     </div>
                     <div className="flex justify-between">
                       <span>Other Deductions</span>
-                      <span>${payroll.otherDeductions.toFixed(2)}</span>
+                      <span>${(payroll.otherDeductions ?? 0).toFixed(2)}</span>
                     </div>
                     <Separator className="my-2" />
                     <div className="flex justify-between font-bold">
                       <span>Total Deductions</span>
-                      <span>${payroll.totalDeductions.toFixed(2)}</span>
+                      <span>${(payroll.totalDeductions ?? 0).toFixed(2)}</span>
                     </div>
                   </div>
                 </div>
@@ -199,13 +199,8 @@ export default function PayslipPage({ params }: { params: { id: string } }) {
               <div className="bg-muted p-4 rounded-lg">
                 <div className="flex justify-between text-lg font-bold">
                   <span>Net Pay</span>
-                  <span>${payroll.netSalary.toFixed(2)}</span>
+                  <span>${(payroll.netSalary ?? 0).toFixed(2)}</span>
                 </div>
-              </div>
-
-              <div className="text-center text-sm text-muted-foreground pt-4">
-                <p>This is a computer-generated document. No signature is required.</p>
-                <p>Generated on: {new Date(payroll.createdAt).toLocaleString()}</p>
               </div>
             </CardContent>
           </Card>

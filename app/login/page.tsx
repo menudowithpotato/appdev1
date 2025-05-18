@@ -67,7 +67,7 @@ export default function LoginPage() {
           <div className="flex items-center gap-2">
             <Link href="/" className="flex items-center gap-2">
               <Briefcase className="h-6 w-6" />
-              <span className="text-xl font-bold">PayrollQR</span>
+              <span className="text-xl font-bold">SlipQR</span>
             </Link>
           </div>
         </div>

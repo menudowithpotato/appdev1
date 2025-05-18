@@ -143,7 +143,7 @@ export default function GeneratePayrollPage() {
             <div className="flex items-center gap-2">
               <Link href="/dashboard" className="flex items-center gap-2">
                 <Briefcase className="h-6 w-6" />
-                <span className="text-xl font-bold">PayrollQR</span>
+                <span className="text-xl font-bold">SlipQR</span>
               </Link>
             </div>
             <nav className="flex items-center gap-4">
