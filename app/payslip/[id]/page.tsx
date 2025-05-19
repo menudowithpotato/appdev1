@@ -9,7 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
 import type { Employee, Payroll } from "@/lib/types"
 
-export default function PayslipPage({ params }: { params: { id: string } }) {
+export default async function PayslipPage({ params }: { params: { id: string } }) {
   const [payroll, setPayroll] = useState<Payroll | null>(null)
   const [employee, setEmployee] = useState<Employee | null>(null)
 
