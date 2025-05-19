@@ -1,6 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
+import { useParams } from "next/navigation"
 import { Download, Mail } from "lucide-react"
 import Link from "next/link"
 import Image from "next/image"
@@ -9,7 +10,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
 import type { Employee, Payroll } from "@/lib/types"
 
-export default async function PayslipPage({ params }: { params: { id: string } }) {
+export default function PayslipPage() {
+  const params = useParams<{ id: string }>()
+
   const [payroll, setPayroll] = useState<Payroll | null>(null)
   const [employee, setEmployee] = useState<Employee | null>(null)
 
