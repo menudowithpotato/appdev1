@@ -7,6 +7,7 @@ import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import { QRCodeGenerator } from "@/components/qr-code-generator"
 import type { Employee } from "@/lib/types"
 
 interface EmployeeListProps {
@@ -47,6 +48,7 @@ export function EmployeeList({ employees }: EmployeeListProps) {
           <TableHead>Department</TableHead>
           <TableHead>Email</TableHead>
           <TableHead className="text-right">Salary</TableHead>
+          <TableHead>QR Code</TableHead> {/* Add this in your TableHeader */}
           <TableHead className="w-[50px]"></TableHead>
         </TableRow>
       </TableHeader>
@@ -58,6 +60,9 @@ export function EmployeeList({ employees }: EmployeeListProps) {
             <TableCell>{employee.department}</TableCell>
             <TableCell>{employee.email}</TableCell>
             <TableCell className="text-right">${employee.salary.toFixed(2)}</TableCell>
+            <TableCell>
+              <QRCodeGenerator value={`https://selectedpayroll.id/employee/${employee.id}`} size={64} />
+            </TableCell>
             <TableCell>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
